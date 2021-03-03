@@ -80,7 +80,7 @@ def bottleneck(n, prev_layer, stage, num_bottle, num_output, type, param_add=Non
         kernel_size = 2
         stride = 2
 
-    setattr(n, conv_name, L.Convolution(getattr(n, prev_layer), num_output=num_output/scale_factor, bias_term=0,
+    setattr(n, conv_name, L.Convolution(getattr(n, prev_layer), num_output=int(num_output/scale_factor), bias_term=0,
                                         kernel_size=kernel_size, stride=stride, weight_filler=dict(type='msra')))
     setattr(n, bn_name, L.BN(getattr(n, conv_name), scale_filler=dict(type='constant', value=1), bn_mode=bn_mode,
                              shift_filler=dict(type='constant', value=0.001), param=[dict(lr_mult=1, decay_mult=1),
@@ -97,15 +97,15 @@ def bottleneck(n, prev_layer, stage, num_bottle, num_output, type, param_add=Non
     prelu_name = 'prelu{}_{}_{}'.format(stage, num_bottle, module+1)
 
     if type == 'dilated':
-        setattr(n, conv_name, L.Convolution(prev_layer, num_output=num_output/scale_factor, bias_term=1, kernel_size=3,
+        setattr(n, conv_name, L.Convolution(prev_layer, num_output=int(num_output/scale_factor), bias_term=1, kernel_size=3,
                                             stride=1, pad=param_add, dilation=param_add,
                                             weight_filler=dict(type='msra')))
     elif type == 'asymmetric':
         conv_name2 = 'conv{}_{}_{}_a'.format(stage, num_bottle, module+1)
-        setattr(n, conv_name2, L.Convolution(prev_layer, num_output=num_output/scale_factor, bias_term=0,
+        setattr(n, conv_name2, L.Convolution(prev_layer, num_output=int(num_output/scale_factor), bias_term=0,
                                              kernel_h=param_add, kernel_w=1, stride=1, pad=1,
                                              weight_filler=dict(type='msra')))
-        setattr(n, conv_name, L.Convolution(getattr(n, conv_name2), num_output=num_output/scale_factor, bias_term=1,
+        setattr(n, conv_name, L.Convolution(getattr(n, conv_name2), num_output=int(num_output/scale_factor), bias_term=1,
                                             kernel_h=1, kernel_w=param_add, stride=1, pad=1,
                                             weight_filler=dict(type='msra')))
     elif type == 'upsampling':
@@ -113,7 +113,7 @@ def bottleneck(n, prev_layer, stage, num_bottle, num_output, type, param_add=Non
         setattr(n, conv_name, L.Deconvolution(prev_layer, convolution_param=dict(num_output=num_output/scale_factor,
                                                                                  bias_term=1, kernel_size=2, stride=2)))
     else:
-        setattr(n, conv_name, L.Convolution(prev_layer, num_output=num_output/scale_factor, bias_term=1,
+        setattr(n, conv_name, L.Convolution(prev_layer, num_output=int(num_output/scale_factor), bias_term=1,
                                             kernel_size=3, stride=1, pad=1, weight_filler=dict(type='msra')))
 
     setattr(n, bn_name, L.BN(getattr(n, conv_name), scale_filler=dict(type='constant', value=1), bn_mode=bn_mode,
